@@ -2,12 +2,14 @@ package com.example.ayomide.travelmantics;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -45,9 +47,6 @@ public class InsertActivity extends AppCompatActivity {
     FirebaseStorage storage;
     StorageReference storageReference;
 
-    private boolean mIsCancelling;
-    private boolean mIsNewNote;
-
     MaterialEditText etTitle, etPrice, etDesc;
     Button btnSelect, btnUpload;
     ImageView imageView;
@@ -63,6 +62,11 @@ public class InsertActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_insert );
+
+        Toolbar toolbar = (Toolbar) findViewById( R.id.toolbar );
+        toolbar.setTitle("Travelmantics");
+        toolbar.setTitleTextColor(Color.WHITE );
+        setSupportActionBar( toolbar );
 
         db = FirebaseDatabase.getInstance();
         deals_table = db.getReference().child( "TravelDeals" );
@@ -140,6 +144,10 @@ public class InsertActivity extends AppCompatActivity {
                 saveDeal();
                 Toast.makeText( this, "Deal saved", Toast.LENGTH_SHORT ).show();
                 clean();
+                return true;
+
+            case R.id.deals_activity:
+                startActivity( new Intent( InsertActivity.this, UserActivity.class ) );
                 return true;
             default:
                 return super.onOptionsItemSelected( item );
