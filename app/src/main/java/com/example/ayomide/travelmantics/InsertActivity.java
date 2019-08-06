@@ -55,7 +55,7 @@ public class InsertActivity extends AppCompatActivity {
     ImageView imageView;
     TextView img_url;
 
-    TravelDeal currentDeal, newDeal;
+    TravelDeal currentDeal;
 
     String dealId;
 
@@ -149,10 +149,6 @@ public class InsertActivity extends AppCompatActivity {
                 Toast.makeText( this, "Deal saved", Toast.LENGTH_SHORT ).show();
                 clean();
                 return true;
-
-            case R.id.deals_activity:
-                startActivity( new Intent( InsertActivity.this, UserActivity.class ) );
-                return true;
             default:
                 return super.onOptionsItemSelected( item );
         }
@@ -177,20 +173,6 @@ public class InsertActivity extends AppCompatActivity {
         etPrice.setText( "" );
         imageView.setImageResource( 0 );
         etTitle.requestFocus();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult( requestCode, resultCode, data );
-
-        if(requestCode == Common.IMAGE_REQUEST && resultCode == RESULT_OK
-                && data != null && data.getData() != null)
-        {
-            imgUri = data.getData(); //return the uri of the selected file
-            img_url.setText( "Upload image: " + data.getData().getLastPathSegment() );
-            btnImgSelect.setText( "IMAGE SELECTED" );
-            btnSelect.setText( "IMAGE UPLOADED" );
-        }
     }
 
     private void openUploadDialog() {
@@ -279,6 +261,19 @@ public class InsertActivity extends AppCompatActivity {
                     progressDialog.setMessage( "Uploaded " + progress + "%" );
                 }
             } );
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult( requestCode, resultCode, data );
+
+        if(requestCode == Common.IMAGE_REQUEST && resultCode == RESULT_OK
+                && data != null && data.getData() != null)
+        {
+            imgUri = data.getData(); //return the uri of the selected file
+            img_url.setText( "Upload image: " + data.getData().getLastPathSegment() );
+            btnImgSelect.setText( "IMAGE SELECTED" );
         }
     }
 }

@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ayomide.travelmantics.Common.Common;
@@ -42,14 +43,13 @@ public class  NewInsertActivity extends AppCompatActivity {
     StorageReference storageReference;
 
     MaterialEditText etTitle, etPrice, etDesc;
-    Button btnSelect, btnUpload;
+    Button btnSelect, btnImgSelect, btnImgUpload;
     ImageView imageView;
+    TextView img_url;
 
-    TravelDeal currentDeal, newDeal;
+    TravelDeal newDeal;
 
-    String dealId;
-
-    Uri imgUri;
+    Uri saveUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,17 +75,9 @@ public class  NewInsertActivity extends AppCompatActivity {
         btnSelect.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                chooseImage();
+                openUploadDialog();
             }
         } );
-    }
-
-    private void chooseImage()
-    {
-        Intent intent = new Intent();
-        intent.setType( "image/*" );
-        intent.setAction( Intent.ACTION_GET_CONTENT );
-        startActivityForResult( Intent.createChooser( intent, "Select A Picture" ), Common.IMAGE_REQUEST );
     }
 
     @Override
@@ -106,9 +98,8 @@ public class  NewInsertActivity extends AppCompatActivity {
                 Toast.makeText( this, "Deal saved", Toast.LENGTH_SHORT ).show();
                 clean();
                 return true;
-
             case R.id.deals_activity:
-                startActivity( new Intent( NewInsertActivity.this, UserActivity.class ) );
+                startActivity( new Intent( NewInsertActivity.this, UserActivity.class) );
                 return true;
             default:
                 return super.onOptionsItemSelected( item );
@@ -117,18 +108,19 @@ public class  NewInsertActivity extends AppCompatActivity {
 
     private void saveDeal()
     {
-        String title = etTitle.getText().toString();
-        String description = etDesc.getText().toString();
-        String price = etPrice.getText().toString();
-        Picasso.with( getBaseContext() ).load( currentDeal.getImage() ).into( imageView );
-        TravelDeal deal = new TravelDeal( title, description, price, "" );
-        deals_table.push().setValue( deal );
+        if (newDeal != null) {
+            deals_table.push().setValue( newDeal );
+            Toast.makeText( NewInsertActivity.this, "New pupil " + newDeal.getTitle() + " was added", Toast.LENGTH_SHORT )
+                    .show();
+        }
+        startActivity( new Intent( NewInsertActivity.this, UserActivity.class ) );
     }
 
     private void clean() {
         etTitle.setText( "" );
         etDesc.setText( "" );
         etPrice.setText( "" );
+        imageView.setImageResource( 0 );
         etTitle.requestFocus();
     }
 
@@ -136,12 +128,11 @@ public class  NewInsertActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult( requestCode, resultCode, data );
 
-        if(requestCode == Common.NEW_IMAGE_REQUEST && resultCode == RESULT_OK
-                && data != null && data.getData() != null)
-        {
-            imgUri = data.getData();
-            btnSelect.setText( "Image Selected" );
-            openUploadDialog();
+        if (requestCode == Common.IMAGE_REQUEST && resultCode == RESULT_OK
+                && data != null && data.getData() != null) {
+            saveUri = data.getData(); //return the uri of the selected file
+            img_url.setText( "Upload image: " + data.getData().getLastPathSegment() );
+            btnImgSelect.setText( "IMAGE SELECTED" );
         }
     }
 
@@ -155,10 +146,18 @@ public class  NewInsertActivity extends AppCompatActivity {
         View view = layoutInflater.inflate( R.layout.upload_image_layout, null );
         alertDialog.setView( view );
 
-        imageView = view.findViewById( R.id.image_deal );
-        btnUpload = view.findViewById( R.id.btnImgUpload );
+        img_url = view.findViewById( R.id.image_url );
+        btnImgSelect = view.findViewById( R.id.btnImgSelect );
+        btnImgUpload = view.findViewById( R.id.btnImgUpload );
 
-        btnUpload.setOnClickListener( new View.OnClickListener() {
+        btnImgSelect.setOnClickListener( new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                chooseImage();
+            }
+        } );
+
+        btnImgUpload.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 uploadImage();
@@ -168,49 +167,57 @@ public class  NewInsertActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
+    private void chooseImage()
+    {
+        Intent intent = new Intent();
+        intent.setType( "image/*" );
+        intent.setAction( Intent.ACTION_GET_CONTENT );
+        startActivityForResult( Intent.createChooser( intent, "Select A Picture" ), Common.IMAGE_REQUEST );
+    }
+
     private void uploadImage()
     {
-        if (imgUri != null) {
-            final ProgressDialog mDialog = new ProgressDialog( this );
-            mDialog.setMessage( "Uploading..." );
-            mDialog.show();
+        if (saveUri!=null)
+        {
+            final ProgressDialog progressDialog = new ProgressDialog( NewInsertActivity.this );
+            progressDialog.setProgressStyle( ProgressDialog.STYLE_HORIZONTAL );
+            progressDialog.setTitle( "Uploading image..." );
+            progressDialog.setProgress( 0 );
+            progressDialog.show();
 
-            String imageName = UUID.randomUUID().toString();
-            final StorageReference imageFolder = storageReference.child( "dealImages/" + imageName );
-            imageFolder.putFile( imgUri ).addOnSuccessListener( new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            final String imageName = UUID.randomUUID().toString();
+            final StorageReference imageFolder = storageReference.child( "images/"+imageName );
+            imageFolder.putFile( saveUri ).addOnSuccessListener( new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    mDialog.dismiss();
+                    progressDialog.dismiss();
                     Toast.makeText( NewInsertActivity.this, "Uploaded!!!", Toast.LENGTH_SHORT ).show();
                     imageFolder.getDownloadUrl().addOnSuccessListener( new OnSuccessListener<Uri>() {
                         @Override
                         public void onSuccess(Uri uri) {
-
                             newDeal = new TravelDeal();
                             newDeal.setTitle( etTitle.getText().toString() );
                             newDeal.setDescription( etDesc.getText().toString() );
                             newDeal.setPrice( etPrice.getText().toString() );
                             newDeal.setImage( uri.toString() );
-
-                            deals_table.push().setValue( newDeal );
-                            Toast.makeText( NewInsertActivity.this, "uploaded", Toast.LENGTH_SHORT )
-                                    .show();
+                            Picasso.with( getBaseContext() ).load( uri ).into( imageView );
                         }
                     } );
                 }
             } ).addOnFailureListener( new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    mDialog.dismiss();
+                    progressDialog.dismiss();
                     Toast.makeText( NewInsertActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT ).show();
                 }
             } ).addOnProgressListener( new OnProgressListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                     double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
-                    mDialog.setMessage( "Uploaded " + progress + "%" );
+                    progressDialog.setMessage( "Uploaded " + progress + "%" );
                 }
             } );
         }
     }
+
 }
