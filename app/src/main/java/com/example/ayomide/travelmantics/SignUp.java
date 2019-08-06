@@ -84,7 +84,8 @@ public class SignUp extends AppCompatActivity {
             mAuth.createUserWithEmailAndPassword( email, password )
                     .addOnCompleteListener( new OnCompleteListener<AuthResult>() {
                         @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
+                        public void onComplete(@NonNull Task<AuthResult> task)
+                        {
                             if(task.isSuccessful())
                             {
                                 currentUserID = mAuth.getCurrentUser().getUid();
