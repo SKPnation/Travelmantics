@@ -22,10 +22,22 @@
             android:textSize="14sp"/>
 
         <LinearLayout
-
             android:orientation="horizontal"
+            android:weightSum="2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/btnImgSelect"
+                android:text="SELECT"
+                android:textColor="#fff"
+                android:textSize="15sp"
+                android:background="@color/colorPrimaryDark"
+                android:layout_weight="1"
+                android:layout_margin="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
 
             <Button
                 android:id="@+id/btnImgUpload"
