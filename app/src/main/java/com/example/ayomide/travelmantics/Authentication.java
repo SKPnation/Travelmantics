@@ -42,7 +42,6 @@ public class Authentication extends AppCompatActivity {
     private void showDialog()
     {
         final AlertDialog.Builder alertDialog = new AlertDialog.Builder( Authentication.this );
-        alertDialog.setTitle( "Pick one" );
 
         LayoutInflater layoutInflater = this.getLayoutInflater();
         View view = layoutInflater.inflate( R.layout.account_check_layout, null );
