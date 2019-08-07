@@ -154,8 +154,6 @@ public class Authentication extends AppCompatActivity {
             String personId = acct.getId();
             Uri personPhoto = acct.getPhotoUrl();
 
-            Toast.makeText( Authentication.this, personName, Toast.LENGTH_SHORT ).show();
-
         }
     }
 
