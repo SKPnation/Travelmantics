@@ -1,26 +1,17 @@
 package com.example.ayomide.travelmantics;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
-
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 public class Authentication extends AppCompatActivity {
 
     private Button btnEmail, btnGoogle;
 
-
-    @SuppressLint("ResourceAsColor")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
@@ -47,5 +38,9 @@ public class Authentication extends AppCompatActivity {
                 //..
             }
         } );
+
     }
+
+
+
 }
