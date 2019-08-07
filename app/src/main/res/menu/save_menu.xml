@@ -4,6 +4,8 @@
     <item
         android:id="@+id/save_menu"
         android:title="save"
+        android:iconTint="#fff"
+        android:iconTintMode="multiply"
         app:showAsAction="always" />
 
     <item

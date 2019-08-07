@@ -2,7 +2,6 @@ package com.example.ayomide.travelmantics;
 
 import android.content.Intent;
 import android.graphics.Color;
-import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,13 +10,18 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.example.ayomide.travelmantics.Model.TravelDeal;
 import com.example.ayomide.travelmantics.ViewHolder.DealViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 public class UserActivity extends AppCompatActivity {
@@ -26,7 +30,8 @@ public class UserActivity extends AppCompatActivity {
     DatabaseReference mDatabaseReference;
     FirebaseRecyclerAdapter<TravelDeal, DealViewHolder> adapter;
 
-    TravelDeal currentDeal;
+    FirebaseUser currentUser;
+    FirebaseAuth mAuth;
 
     //View
     RecyclerView recycler_deals;
@@ -42,6 +47,9 @@ public class UserActivity extends AppCompatActivity {
         toolbar.setTitleTextColor(Color.WHITE );
         setSupportActionBar( toolbar );
 
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
+
         db = FirebaseDatabase.getInstance();
         mDatabaseReference = db.getReference().child( "TravelDeals" );
 
@@ -52,6 +60,45 @@ public class UserActivity extends AppCompatActivity {
         recycler_deals.setLayoutManager( layoutManager );
 
         loadDealsList();
+    }
+
+    @Override
+    protected void onStart()
+    {
+        super.onStart();
+
+        //if user isn't authenticated
+        if(currentUser == null)
+        {
+            startActivity( new Intent( UserActivity.this, Authentication.class ) );
+        }
+        else
+        {
+            VerifyUserExistence();
+        }
+    }
+
+    private void VerifyUserExistence()
+    {
+        final String currentUserID = mAuth.getCurrentUser().getUid();
+
+        /*under the parent node which is Users, we have different IDs for different users and under
+         that currentUserID we'll have name and status */
+        DatabaseReference user_table = FirebaseDatabase.getInstance().getReference();
+        user_table.child("Users").child(currentUserID).addValueEventListener( new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if((dataSnapshot.child("name").exists()))
+                {
+                    Toast.makeText( UserActivity.this, "Welcome " + dataSnapshot.child( "name" ).getValue(), Toast.LENGTH_LONG ).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void loadDealsList()
@@ -96,6 +143,10 @@ public class UserActivity extends AppCompatActivity {
         switch (item.getItemId()){
             case R.id.insert_menu:
                 startActivity( new Intent( this, NewInsertActivity.class ) );
+                return true;
+            case R.id.log_out:
+                mAuth.signOut();
+                startActivity( new Intent( this, Authentication.class ) );
                 return true;
             default:
                 return super.onOptionsItemSelected( item );

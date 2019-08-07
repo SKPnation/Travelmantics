@@ -9,6 +9,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Patterns;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -102,6 +104,7 @@ public class SignUp extends AppCompatActivity {
                                         {
                                             startActivity( new Intent( SignUp.this, UserActivity.class ) );
                                             Toast.makeText(SignUp.this, "Account created successfully", Toast.LENGTH_SHORT).show();
+                                            finish();
                                             loadingBar.dismiss();
                                         }
                                         else
@@ -145,5 +148,26 @@ public class SignUp extends AppCompatActivity {
         }
 
         return false;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate( R.menu.already_member, menu );
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        switch (item.getItemId()){
+            case R.id.have_account:
+                startActivity( new Intent( SignUp.this, Login.class ) );
+                return true;
+            default:
+                return super.onOptionsItemSelected( item );
+        }
     }
 }
